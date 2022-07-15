@@ -278,7 +278,25 @@ async def comp(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         int: The expected state of the conversation handler after this function runs.
     """
     if competition['on']:
-        msg = "🏁 <b>Buy competition ends in %s /comp\n🎖 Winning prize %s</b>" % (get_dif(), prize_str())
+        results = None
+        if len(competition['best']['buy']) > 0 and competition['highest']:
+            buy = {k: v for k, v in sorted(competition['best']['buy'].items(), key=lambda item: item[1])}
+            for i in reversed(range(3)):
+                possible = len(buy.values()) > i
+                if not possible:
+                    continue
+                else:
+                    results = list(buy.items())[-(i+1):]
+                    break
+            medals = {0:'🥇', 1: '🥈', 2: '🥉'}
+            winners = ''
+            for i in range(len(results)):
+                addr = results[i][0] if competition['highest'] else results[i]
+                amnt = results[i][1] if competition['highest'] else ''
+                winners += medals[i] + ' ' + addr[:6] +'...'+ addr[-4:]+ (('➖ %s BNB' % amnt) if competition['highest'] else '') +  '\n'
+            msg = "🏁 <b>Buy competition ends in %s /comp\n🎖 Winning prize %s\n\n%s</b>" % (get_dif(), prize_str(), winners)  
+        else:
+            msg = "🏁 <b>Buy competition ends in %s /comp\n🎖 Winning prize %s\n\nThere are no buyers yet.</b>" % (get_dif(), prize_str())  
         if update.message:
               await update.message.reply_text(
               text=msg,
