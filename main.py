@@ -307,6 +307,7 @@ async def comp(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             await query.from_user.send_message(
               text=msg,
               parse_mode= constants.ParseMode.HTML)
+        return START_PAGE
     else:
         if update.message:
             await update.message.reply_text(
@@ -319,8 +320,9 @@ async def comp(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             await query.edit_message_text(text="⚙️ <b>Buy Bot Settings</b>\n\n<i>Biggest Buy Tech is an all in one buybot featuring automatic biggest buy contests. The Bot tracks cumulative buys to determine the winner!</i>", 
             reply_markup=keyboard(False),
             parse_mode=constants.ParseMode.HTML)
+        return COMP_PAGE
 
-    return COMP_PAGE
+    
 
 async def toggle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """ Toggles the buy-tracking ability of the BestBuy bot
