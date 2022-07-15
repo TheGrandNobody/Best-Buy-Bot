@@ -137,7 +137,8 @@ async def log_loop(event_filter : Filter, poll_interval: int) -> None:
         time.sleep(poll_interval)
         if (competition['on'] and time.time() >= competition['time']['posix']):
             await end_competition()
-            break
+            if not tracking:
+                break
         if task.stopped():
             break
 
@@ -276,17 +277,30 @@ async def comp(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     Returns:
         int: The expected state of the conversation handler after this function runs.
     """
-    if update.message:
-        await update.message.reply_text(
-          text="⚙️ <b>Buy Bot Settings</b>\n\n<i>Biggest Buy Tech is an all in one buybot featuring automatic biggest buy contests. The Bot tracks cumulative buys to determine the winner!</i>",
-          reply_markup=keyboard(False),
-          parse_mode= constants.ParseMode.HTML)
+    if competition['on']:
+        msg = "🏁 <b>Buy competition ends in %s /comp\n🎖 Winning prize %s</b>" % (get_dif(), prize_str())
+        if update.message:
+              await update.message.reply_text(
+              text=msg,
+              parse_mode= constants.ParseMode.HTML)
+        else:
+            query = update.callback_query
+            await query.answer()
+            await query.from_user.send_message(
+              text=msg,
+              parse_mode= constants.ParseMode.HTML)
     else:
-        query = update.callback_query
-        await query.answer()
-        await query.edit_message_text(text="⚙️ <b>Buy Bot Settings</b>\n\n<i>Biggest Buy Tech is an all in one buybot featuring automatic biggest buy contests. The Bot tracks cumulative buys to determine the winner!</i>", 
-        reply_markup=keyboard(False),
-        parse_mode=constants.ParseMode.HTML)
+        if update.message:
+            await update.message.reply_text(
+              text="⚙️ <b>Buy Bot Settings</b>\n\n<i>Biggest Buy Tech is an all in one buybot featuring automatic biggest buy contests. The Bot tracks cumulative buys to determine the winner!</i>",
+              reply_markup=keyboard(False),
+              parse_mode= constants.ParseMode.HTML)
+        else:
+            query = update.callback_query
+            await query.answer()
+            await query.edit_message_text(text="⚙️ <b>Buy Bot Settings</b>\n\n<i>Biggest Buy Tech is an all in one buybot featuring automatic biggest buy contests. The Bot tracks cumulative buys to determine the winner!</i>", 
+            reply_markup=keyboard(False),
+            parse_mode=constants.ParseMode.HTML)
 
     return COMP_PAGE
 
